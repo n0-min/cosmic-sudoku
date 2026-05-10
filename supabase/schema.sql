@@ -58,7 +58,7 @@ CREATE TABLE public.duel_progress (
   duel_id UUID REFERENCES public.duels(id) ON DELETE CASCADE NOT NULL,
   user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   completion_percentage INTEGER DEFAULT 0,
-  current_time INTEGER DEFAULT 0,
+  elapsed_time INTEGER DEFAULT 0,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   UNIQUE(duel_id, user_id)
 );
