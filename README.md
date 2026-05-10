@@ -1,52 +1,51 @@
-# 🚀 Cosmic Sudoku Mastery
+# 🌌 Cosmic Sudoku
 
-A high-performance Sudoku web platform with space progression theme, AI coaching, and real-time duels.
+A space-themed Sudoku game with dynamic cosmic backgrounds, currency system, and skins shop built with Next.js and Supabase.
 
-## ⚠️ IMPORTANT: Path Issue
+## ✨ Features
 
-**The project is currently in a directory with Cyrillic characters (`судоку`) which causes Next.js build errors.**
+- **🎮 Classic Sudoku Mode** - 4 difficulty levels (Easy, Medium, Hard, Expert)
+- **🌍 Dynamic Cosmic Backgrounds** - Backgrounds change based on difficulty:
+  - Easy: Earth (blue theme)
+  - Medium: Moon (gray theme)
+  - Hard: Mars (red theme)
+  - Expert: Solar System (purple theme)
+- **💰 Cosmic Coins Currency** - Earn coins by completing puzzles
+- **🛒 Skins Shop** - 6 unique cosmic themes to unlock:
+  - Classic (Free)
+  - Nebula Dream (500 coins)
+  - Aurora Borealis (750 coins)
+  - Black Hole (1000 coins)
+  - Spiral Galaxy (1500 coins)
+  - Supernova Burst (2000 coins)
+- **⚔️ Duel Mode** - Coming soon!
 
-To fix this, move the project to a path with only ASCII characters:
+## 🎯 Earning Coins
 
-```bash
-# Move the project to a path without Cyrillic characters
-cd C:\Users\User\Desktop
-move судоку\cosmic-sudoku cosmic-sudoku
-cd cosmic-sudoku
-npm run build
-```
+Complete Sudoku puzzles to earn Cosmic Coins:
 
-Or create a fresh copy:
-```bash
-cd C:\Users\User\Desktop
-mkdir cosmic-sudoku-game
-xcopy судоку\cosmic-sudoku cosmic-sudoku-game /E /I
-cd cosmic-sudoku-game
-npm install
-npm run build
-```
-
-## 🌟 Features
-
-- **Space Progression System**: Journey from Earth (Levels 1-10) → Moon → Mars → Interstellar Space (100+)
-- **Tension VFX**: Dynamic visual effects when time is running out (screen shake, color shifts, glitch effects)
-- **AI Coach**: Get strategic hints powered by Claude 3.5 Sonnet via OpenRouter
-- **Real-time Duels**: 1v1 matchmaking with live progress tracking
-- **Leaderboards**: Global and city-based rankings
-- **Achievement System**: Unlock cosmic themes (Nebula, Black Hole, Supernova)
-- **Anti-Cheat**: Server-side validation and Row Level Security
+- **Easy**: 10 coins
+- **Medium**: 25 coins
+- **Hard**: 50 coins
+- **Expert**: 100 coins
+- **Speed Bonus**: Up to +50 coins for fast completion
+- **Mistake Penalty**: -5 coins per error
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 14+ (App Router), TypeScript, Tailwind CSS, Framer Motion
+- **Frontend**: Next.js 14+ (App Router), TypeScript, Tailwind CSS
 - **Backend**: Supabase (Auth, Database, Realtime)
-- **AI**: OpenRouter API (Claude 3.5 Sonnet)
 - **State Management**: Zustand
-- **Security**: Zod validation, DOMPurify (XSS protection), RLS policies
+- **Animations**: Framer Motion
+- **Security**: Row Level Security (RLS), server-side validation
 
 ## 📦 Installation
 
-1. **Ensure the project is in an ASCII-only path** (see warning above)
+1. **Clone the repository**:
+```bash
+git clone https://github.com/n0-min/cosmic-sudoku.git
+cd cosmic-sudoku
+```
 
 2. **Install dependencies**:
 ```bash
@@ -54,147 +53,135 @@ npm install
 ```
 
 3. **Set up environment variables**:
-```bash
-cp .env.local.example .env.local
-```
 
-Edit `.env.local` and add your credentials:
+Create `.env.local` file:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-OPENROUTER_API_KEY=your_openrouter_api_key
 ```
 
 4. **Set up Supabase**:
    - Create a new Supabase project at https://supabase.com
-   - Run the SQL in `supabase/schema.sql` in the SQL Editor
-   - Run the SQL in `supabase/functions.sql` in the SQL Editor
-   - Enable Email authentication in Authentication settings
+   - Run the SQL files in order:
+     1. `supabase/schema.sql` - Creates tables and RLS policies
+     2. `supabase/currency-functions.sql` - Currency system functions
+     3. `supabase/functions.sql` - Additional database functions
 
-5. **Get OpenRouter API Key**:
-   - Sign up at https://openrouter.ai
-   - Create an API key
-   - Add it to `.env.local`
-
-## 🚀 Development
-
+5. **Run the development server**:
 ```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## 🏗️ Build
+## 🎮 How to Play
 
-```bash
-npm run build
-npm start
-```
+1. Click **Classic Mode** on the main menu
+2. Select your difficulty level
+3. Fill in the Sudoku grid
+4. Complete the puzzle to earn Cosmic Coins
+5. Visit the **Skins Shop** to purchase new themes
+
+## 🗄️ Database Schema
+
+The game uses 8 main tables:
+- `profiles` - User profiles with coins and current skin
+- `games` - Game history and scores
+- `achievements` - User achievements
+- `duels` - Duel matches (coming soon)
+- `duel_progress` - Real-time duel progress
+- `skins` - Available skins in the shop
+- `user_skins` - User-owned skins
+
+All tables have Row Level Security enabled for data protection.
 
 ## 🔒 Security Features
 
-### Anti-Cheat Measures
-- Server-side Sudoku validation
-- Timer verification (prevents client-side manipulation)
-- Puzzle tampering detection
-- Zod schema validation on all API routes
-
-### Database Security
-- Row Level Security (RLS) on all tables
-- Users can only write their own scores
-- XSS protection with DOMPurify on leaderboard usernames
-- Secure API key handling via environment variables
-
-### Input Sanitization
-- All user inputs validated with Zod
-- Leaderboard data sanitized before rendering
-- Protected against SQL injection via Supabase client
-
-## 🎮 Game Mechanics
-
-### Scoring System
-```
-Base Score: 1000
-+ Time Bonus: max(0, 1200 - seconds)
-- Mistake Penalty: mistakes × 50
-- Hint Penalty: hints × 100
-× Difficulty Multiplier: easy(1), medium(1.5), hard(2), expert(3)
-```
-
-### Progression
-- Complete puzzles to earn points
-- Level up every 1000 points
-- Unlock new cosmic themes and achievements
+- **Row Level Security (RLS)** on all database tables
+- **Server-side validation** for game completion
+- **Anti-cheat measures** to prevent score manipulation
+- **Secure currency transactions** via database functions
 
 ## 📁 Project Structure
 
 ```
 cosmic-sudoku/
 ├── app/
-│   ├── api/
-│   │   ├── validate/       # Server-side puzzle validation
-│   │   ├── leaderboard/    # Leaderboard with RLS
-│   │   └── ai-coach/       # AI hint generation
-│   ├── globals.css         # Global styles + VFX animations
-│   └── page.tsx            # Main game page
+│   ├── page.tsx              # Main menu
+│   ├── game/page.tsx         # Game page
+│   └── shop/page.tsx         # Skins shop
 ├── components/
 │   ├── game/
-│   │   ├── sudoku-grid.tsx    # Interactive grid
-│   │   ├── game-timer.tsx     # Timer with tension effects
-│   │   ├── game-controls.tsx  # Game controls
-│   │   ├── tension-vfx.tsx    # Visual effects
-│   │   └── ai-coach.tsx       # AI hint UI
-│   └── ui/                    # Reusable UI components
+│   │   ├── cosmic-background.tsx  # Animated backgrounds
+│   │   ├── sudoku-grid.tsx        # Game grid
+│   │   ├── game-timer.tsx         # Timer
+│   │   └── game-controls.tsx      # Controls
+│   └── ui/                        # UI components
 ├── lib/
-│   ├── sudoku/
-│   │   └── generator.ts       # Backtracking algorithm
-│   ├── store/
-│   │   └── game-store.ts      # Zustand state management
-│   └── validation/
-│       └── schemas.ts         # Zod schemas
-├── types/
-│   └── sudoku.ts              # TypeScript types
-├── utils/
-│   └── supabase/              # Supabase clients
-└── supabase/
-    ├── schema.sql             # Database schema + RLS
-    └── functions.sql          # Database functions
+│   ├── sudoku/generator.ts        # Sudoku generation
+│   ├── store/game-store.ts        # Game state
+│   ├── store/user-store.ts        # User state
+│   └── backgrounds/               # Background configs
+├── supabase/
+│   ├── schema.sql                 # Database schema
+│   ├── currency-functions.sql     # Currency system
+│   └── functions.sql              # Additional functions
+└── types/
+    └── sudoku.ts                  # TypeScript types
 ```
 
-## 🎨 Themes
+## 🚀 Deployment
 
-Unlock cosmic themes by completing achievements:
-- **Nebula**: Complete 10 puzzles
-- **Black Hole**: Complete 50 puzzles
-- **Supernova**: Complete 100 puzzles
+Deploy to Vercel:
 
-## 🤝 Contributing
+```bash
+npm run build
+vercel --prod
+```
 
-Contributions are welcome! Please ensure:
-- All API routes have Zod validation
-- Security best practices are followed
-- Tests pass before submitting PRs
+Don't forget to add environment variables in Vercel dashboard.
+
+## 🎨 Customization
+
+### Adding New Skins
+
+1. Add skin data to `supabase/schema.sql`:
+```sql
+INSERT INTO public.skins (skin_id, name, description, price, rarity, theme_colors) VALUES
+  ('your-skin', 'Your Skin Name', 'Description', 1000, 'epic', '{"primary": "#color1", "secondary": "#color2"}');
+```
+
+2. Update the skins shop UI in `app/shop/page.tsx`
+
+### Changing Backgrounds
+
+Edit `lib/backgrounds/cosmic-backgrounds.ts` to customize backgrounds for each difficulty level.
+
+## 🐛 Known Issues
+
+- Duel mode is not yet implemented
+- Authentication UI needs to be added (backend is ready)
+- Leaderboard frontend needs implementation
+
+## 🔮 Future Features
+
+- [ ] Real-time multiplayer duels
+- [ ] Global leaderboards
+- [ ] Achievement notifications
+- [ ] Daily challenges
+- [ ] Mobile app version
+- [ ] Social features
 
 ## 📄 License
 
 MIT License - feel free to use this project for learning or commercial purposes.
 
-## 🐛 Known Issues
+## 🤝 Contributing
 
-- **Build fails with Cyrillic path**: Move project to ASCII-only path
-- Real-time duels feature requires additional implementation
-- Achievement system needs UI integration
-- Theme switching not yet implemented
-
-## 🔮 Future Enhancements
-
-- [ ] Mobile app (React Native)
-- [ ] Daily challenges
-- [ ] Tournament mode
-- [ ] Social features (friends, chat)
-- [ ] Puzzle creator mode
-- [ ] Offline mode with service workers
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ---
 
-Built with ❤️ using Next.js, Supabase, and Claude AI
+**Built with ❤️ using Next.js, Supabase, and TypeScript**
+
+🌟 Star this repo if you like it!
