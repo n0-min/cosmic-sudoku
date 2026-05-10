@@ -1,144 +1,101 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/store/user-store';
-import type { Skin } from '@/types/sudoku';
-
-const MOCK_SKINS: Skin[] = [
-  {
-    id: '1',
-    skin_id: 'default',
-    name: 'Classic',
-    description: 'The original cosmic theme',
-    price: 0,
-    rarity: 'common',
-    theme_colors: { primary: '#8b5cf6', secondary: '#3b82f6' },
-  },
-  {
-    id: '2',
-    skin_id: 'nebula',
-    name: 'Nebula Dream',
-    description: 'Purple and pink cosmic clouds',
-    price: 500,
-    rarity: 'rare',
-    theme_colors: { primary: '#ec4899', secondary: '#a855f7' },
-  },
-  {
-    id: '3',
-    skin_id: 'blackhole',
-    name: 'Black Hole',
-    description: 'Dark matter and event horizon',
-    price: 1000,
-    rarity: 'epic',
-    theme_colors: { primary: '#1e1b4b', secondary: '#312e81' },
-  },
-  {
-    id: '4',
-    skin_id: 'supernova',
-    name: 'Supernova Burst',
-    description: 'Explosive stellar energy',
-    price: 2000,
-    rarity: 'legendary',
-    theme_colors: { primary: '#f59e0b', secondary: '#ef4444' },
-  },
-  {
-    id: '5',
-    skin_id: 'aurora',
-    name: 'Aurora Borealis',
-    description: 'Northern lights in space',
-    price: 750,
-    rarity: 'rare',
-    theme_colors: { primary: '#10b981', secondary: '#06b6d4' },
-  },
-  {
-    id: '6',
-    skin_id: 'galaxy',
-    name: 'Spiral Galaxy',
-    description: 'Swirling stars and dust',
-    price: 1500,
-    rarity: 'epic',
-    theme_colors: { primary: '#6366f1', secondary: '#8b5cf6' },
-  },
-];
+import { getAllSkins, type SkinTheme } from '@/lib/skins/material-skins';
 
 const RARITY_COLORS = {
-  common: 'from-gray-600 to-gray-700',
-  rare: 'from-blue-600 to-blue-700',
-  epic: 'from-purple-600 to-purple-700',
-  legendary: 'from-orange-600 to-red-600',
+  common: 'from-[#4B5563] to-[#6B7280]',
+  rare: 'from-[#3B82F6] to-[#2563EB]',
+  epic: 'from-[#8B5CF6] to-[#7C3AED]',
+  legendary: 'from-[#F59E0B] to-[#DC2626]',
 };
 
 const RARITY_GLOW = {
-  common: 'shadow-gray-500/50',
-  rare: 'shadow-blue-500/50',
-  epic: 'shadow-purple-500/50',
-  legendary: 'shadow-orange-500/50',
+  common: '0 0 20px rgba(107, 114, 128, 0.3)',
+  rare: '0 0 30px rgba(59, 130, 246, 0.5)',
+  epic: '0 0 40px rgba(139, 92, 246, 0.6)',
+  legendary: '0 0 50px rgba(245, 158, 11, 0.7)',
+};
+
+const RARITY_LABELS = {
+  common: 'COMMON',
+  rare: 'RARE',
+  epic: 'EPIC',
+  legendary: 'LEGENDARY',
 };
 
 export default function ShopPage() {
   const router = useRouter();
-  const { cosmicCoins, currentSkin, ownedSkins, setCurrentSkin, addOwnedSkin, addCoins } = useUserStore();
-  const [selectedSkin, setSelectedSkin] = useState<Skin | null>(null);
+  const { cosmicCoins, currentSkin, setCurrentSkin } = useUserStore();
+  const [ownedSkins, setOwnedSkins] = useState<string[]>(['default']);
+  const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const allSkins = getAllSkins();
 
-  const handlePurchase = (skin: Skin) => {
-    if (cosmicCoins >= skin.price && !ownedSkins.includes(skin.skin_id)) {
-      addCoins(-skin.price);
-      addOwnedSkin(skin.skin_id);
-      setCurrentSkin(skin.skin_id);
-      alert(`✨ ${skin.name} purchased and equipped!`);
+  const handlePurchase = async (skin: SkinTheme) => {
+    if (cosmicCoins < skin.price) {
+      alert('Not enough Cosmic Coins!');
+      return;
     }
+
+    setPurchasingId(skin.id);
+
+    // Simulate purchase
+    setTimeout(() => {
+      setOwnedSkins([...ownedSkins, skin.id]);
+      useUserStore.setState({ cosmicCoins: cosmicCoins - skin.price });
+      setPurchasingId(null);
+    }, 500);
   };
 
   const handleEquip = (skinId: string) => {
     setCurrentSkin(skinId);
-    alert('✅ Skin equipped!');
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
-        <div className="absolute inset-0 opacity-20">
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-white rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                opacity: [0.2, 1, 0.2],
-              }}
-              transition={{
-                duration: 2 + Math.random() * 3,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#0A0E1A] via-[#1A2744] to-[#0A0E1A] text-white overflow-hidden relative">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(100)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              opacity: [0.3, 1, 0.3],
+              scale: [1, 1.5, 1],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 4,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+            }}
+          />
+        ))}
       </div>
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-[2.618rem]">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push('/')}
-            className="px-4 py-2 bg-slate-800/50 backdrop-blur rounded-lg hover:bg-slate-700/50 transition-colors text-white"
+            className="px-6 py-3 bg-[#1A2744]/80 backdrop-blur rounded-lg hover:bg-[#2A3F5F]/80 transition-all nebula-edge font-ui uppercase tracking-wider"
           >
-            ← Back to Menu
+            ← Back
           </motion.button>
 
-          <div className="px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-full shadow-lg">
-            <div className="flex items-center gap-2 text-white font-bold text-xl">
+          <div className="px-6 py-3 bg-gradient-to-r from-[#FFD700] to-[#FFA500] rounded-full shadow-lg glow-medium">
+            <div className="flex items-center gap-3 text-[#0A0E1A] font-data font-bold text-lg">
               <span className="text-2xl">💰</span>
-              <span>{cosmicCoins.toLocaleString()} Cosmic Coins</span>
+              <span>{cosmicCoins.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -147,20 +104,21 @@ export default function ShopPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-[4.236rem]"
         >
-          <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
-            Skins Shop
+          <h1 className="font-title text-7xl md:text-8xl font-black bg-gradient-to-r from-[#8B5CF6] via-[#00F5FF] to-[#FFD700] bg-clip-text text-transparent mb-4 tracking-wide">
+            MATERIAL REALITIES
           </h1>
-          <p className="text-xl text-gray-300">Customize Your Cosmic Experience</p>
+          <p className="font-ui text-xl text-[#8A9BB8] tracking-widest uppercase">Six Distinct Physical States</p>
         </motion.div>
 
         {/* Skins Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          {MOCK_SKINS.map((skin, index) => {
-            const isOwned = ownedSkins.includes(skin.skin_id);
-            const isEquipped = currentSkin === skin.skin_id;
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1.618rem] max-w-7xl mx-auto">
+          {allSkins.map((skin, index) => {
+            const isOwned = ownedSkins.includes(skin.id);
+            const isEquipped = currentSkin === skin.id;
             const canAfford = cosmicCoins >= skin.price;
+            const isPurchasing = purchasingId === skin.id;
 
             return (
               <motion.div
@@ -168,68 +126,97 @@ export default function ShopPage() {
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-                className={`relative p-6 rounded-2xl bg-gradient-to-br ${RARITY_COLORS[skin.rarity]} ${RARITY_GLOW[skin.rarity]} shadow-2xl overflow-hidden`}
+                whileHover={{ scale: 1.03 }}
+                className="relative p-8 rounded-2xl bg-gradient-to-br overflow-hidden nebula-edge"
+                style={{
+                  background: `linear-gradient(135deg, ${skin.background.gradient[0]}, ${skin.background.gradient[1]})`,
+                  boxShadow: RARITY_GLOW[skin.rarity],
+                }}
               >
                 {/* Rarity Badge */}
-                <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 backdrop-blur rounded-full text-xs font-bold text-white uppercase">
-                  {skin.rarity}
+                <div
+                  className={`absolute top-4 right-4 px-4 py-2 bg-gradient-to-r ${RARITY_COLORS[skin.rarity]} rounded-full text-xs font-ui font-bold uppercase tracking-widest`}
+                >
+                  {RARITY_LABELS[skin.rarity]}
                 </div>
 
                 {/* Equipped Badge */}
                 {isEquipped && (
-                  <div className="absolute top-4 left-4 px-3 py-1 bg-green-600 rounded-full text-xs font-bold text-white">
-                    ✓ Equipped
+                  <div className="absolute top-4 left-4 px-4 py-2 bg-[#10B981] rounded-full text-xs font-ui font-bold uppercase tracking-widest glow-soft">
+                    ✓ Active
                   </div>
                 )}
 
-                {/* Preview */}
+                {/* Material Preview */}
                 <div
-                  className="w-full h-32 rounded-lg mb-4"
+                  className="w-full h-40 rounded-xl mb-6 relative overflow-hidden"
                   style={{
-                    background: `linear-gradient(135deg, ${skin.theme_colors.primary}, ${skin.theme_colors.secondary})`,
+                    background: `linear-gradient(135deg, ${skin.background.gradient.join(', ')})`,
+                    border: `2px solid ${skin.grid.border}`,
+                    boxShadow: `0 0 30px ${skin.grid.borderGlow}`,
                   }}
-                />
+                >
+                  {/* Mini grid preview */}
+                  <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1 p-4">
+                    {[...Array(9)].map((_, i) => (
+                      <div
+                        key={i}
+                        className="rounded"
+                        style={{
+                          background: skin.grid.cellBg,
+                          border: `1px solid ${skin.grid.border}`,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
 
                 {/* Info */}
-                <h3 className="text-2xl font-bold text-white mb-2">{skin.name}</h3>
-                <p className="text-sm text-white/80 mb-4">{skin.description}</p>
+                <h3 className="font-title text-3xl font-bold mb-2 tracking-wide">{skin.name}</h3>
+                <p className="font-ui text-sm text-white/80 mb-6 leading-relaxed">{skin.description}</p>
+
+                {/* Effects Info */}
+                <div className="mb-6 p-3 bg-black/30 rounded-lg">
+                  <p className="font-data text-xs text-white/70 uppercase tracking-wider">
+                    Effect: {skin.effects.type} • {skin.effects.intensity}
+                  </p>
+                </div>
 
                 {/* Price/Action */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-yellow-300 font-bold text-lg">
+                  <div className="flex items-center gap-2 text-[#FFD700] font-data font-bold text-xl">
                     <span>💰</span>
                     <span>{skin.price === 0 ? 'Free' : skin.price.toLocaleString()}</span>
                   </div>
 
                   {isOwned ? (
                     isEquipped ? (
-                      <div className="px-4 py-2 bg-green-600/50 rounded-lg text-white font-semibold">
-                        Equipped
+                      <div className="px-6 py-3 bg-[#10B981]/50 rounded-lg font-ui uppercase tracking-wider text-sm">
+                        Active
                       </div>
                     ) : (
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleEquip(skin.skin_id)}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-semibold transition-colors"
+                        onClick={() => handleEquip(skin.id)}
+                        className="px-6 py-3 bg-gradient-to-r from-[#3B82F6] to-[#2563EB] hover:from-[#2563EB] hover:to-[#1D4ED8] rounded-lg font-ui uppercase tracking-wider text-sm transition-all glow-soft"
                       >
                         Equip
                       </motion.button>
                     )
                   ) : (
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handlePurchase(skin)}
-                      disabled={!canAfford}
-                      className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                      whileHover={{ scale: canAfford ? 1.05 : 1 }}
+                      whileTap={{ scale: canAfford ? 0.95 : 1 }}
+                      onClick={() => canAfford && handlePurchase(skin)}
+                      disabled={!canAfford || isPurchasing}
+                      className={`px-6 py-3 rounded-lg font-ui uppercase tracking-wider text-sm transition-all ${
                         canAfford
-                          ? 'bg-purple-600 hover:bg-purple-500 text-white'
-                          : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                          ? 'bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] hover:from-[#7C3AED] hover:to-[#6D28D9] glow-medium'
+                          : 'bg-[#4B5563] cursor-not-allowed opacity-50'
                       }`}
                     >
-                      {canAfford ? 'Buy' : 'Not Enough'}
+                      {isPurchasing ? 'Acquiring...' : canAfford ? 'Purchase' : 'Insufficient'}
                     </motion.button>
                   )}
                 </div>
@@ -238,18 +225,15 @@ export default function ShopPage() {
           })}
         </div>
 
-        {/* Info Box */}
+        {/* Footer */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="mt-12 max-w-2xl mx-auto p-6 bg-slate-800/50 backdrop-blur rounded-2xl text-center"
+          transition={{ delay: 0.8 }}
+          className="mt-[4.236rem] text-center text-[#8A9BB8] font-ui"
         >
-          <h3 className="text-2xl font-bold text-white mb-2">💡 How to Earn Coins</h3>
-          <p className="text-gray-300">
-            Complete puzzles to earn Cosmic Coins! Higher difficulties reward more coins.
-            <br />
-            Easy: 10 coins • Medium: 25 coins • Hard: 50 coins • Expert: 100 coins
+          <p className="text-sm tracking-widest uppercase">
+            Each skin is a distinct material reality with unique visual physics
           </p>
         </motion.div>
       </div>

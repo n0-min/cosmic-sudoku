@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Tektur, Jura, JetBrains_Mono } from "next/font/google";
+import { SkinProvider } from "@/components/skins/skin-provider";
 import "./globals.css";
 
 const tektur = Tektur({
@@ -35,7 +36,9 @@ export default function RootLayout({
       lang="en"
       className={`${tektur.variable} ${jura.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#0A0E1A]">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#0A0E1A]">
+        <SkinProvider>{children}</SkinProvider>
+      </body>
     </html>
   );
 }
