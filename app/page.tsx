@@ -3,10 +3,49 @@
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/store/user-store';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useEffect, useState } from 'react';
+import type { User } from '@supabase/supabase-js';
 
 export default function MainMenu() {
   const router = useRouter();
   const { cosmicCoins } = useUserStore();
+  const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string>('');
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('username, cosmic_coins')
+          .eq('id', user.id)
+          .single();
+
+        if (profile) {
+          setUsername(profile.username);
+          useUserStore.setState({ cosmicCoins: profile.cosmic_coins });
+        }
+      }
+    };
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.refresh();
+  };
 
   const menuItems = [
     {
@@ -65,6 +104,39 @@ export default function MainMenu() {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-8 flex flex-col items-center justify-center min-h-screen">
+        {/* Auth Buttons */}
+        <div className="absolute top-8 right-8">
+          {user ? (
+            <div className="flex items-center gap-4">
+              <div className="text-white">
+                <p className="text-sm text-gray-400">Welcome back,</p>
+                <p className="font-bold">{username || user.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-4">
+              <button
+                onClick={() => router.push('/login')}
+                className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => router.push('/signup')}
+                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition"
+              >
+                Sign Up
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -50 }}

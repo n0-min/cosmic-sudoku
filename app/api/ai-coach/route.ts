@@ -83,11 +83,22 @@ Provide helpful strategic advice without giving away the exact answer. Explain S
 
 Keep your response concise (2-3 sentences) and encouraging.`;
 
+    const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+
+    if (!OPENROUTER_API_KEY) {
+      return NextResponse.json({
+        hint: analysis + '\n\n💡 Tip: Add OPENROUTER_API_KEY to get AI-powered strategic hints!',
+        analysis,
+      });
+    }
+
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+        'X-Title': 'Cosmic Sudoku',
       },
       body: JSON.stringify({
         model: 'anthropic/claude-3.5-sonnet',
@@ -98,13 +109,14 @@ Keep your response concise (2-3 sentences) and encouraging.`;
           },
         ],
         max_tokens: 300,
+        temperature: 0.7,
       }),
     });
 
     if (!response.ok) {
       console.error('OpenRouter API error:', await response.text());
       return NextResponse.json(
-        { hint: analysis },
+        { hint: analysis, analysis },
         { status: 200 }
       );
     }
