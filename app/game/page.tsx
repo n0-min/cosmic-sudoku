@@ -15,35 +15,35 @@ export default function GamePage() {
   const { cosmicCoins } = useUserStore();
 
   return (
-    <div className="min-h-screen text-white overflow-hidden relative">
+    <div className="min-h-screen text-white overflow-hidden relative bg-gradient-to-b from-[#0A0E1A] via-[#1A2744] to-[#0A0E1A]">
       <CosmicBackground />
       <TensionVFX />
 
-      <main className="relative z-10 container mx-auto px-4 py-8 flex flex-col items-center gap-8">
+      <main className="relative z-10 container mx-auto px-4 py-8 flex flex-col items-center gap-[1.618rem]">
         {/* Header with Back Button and Coins */}
         <div className="w-full max-w-4xl flex justify-between items-center">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push('/')}
-            className="px-4 py-2 bg-slate-800/50 backdrop-blur rounded-lg hover:bg-slate-700/50 transition-colors"
+            className="px-6 py-3 bg-[#1A2744]/80 backdrop-blur rounded-lg hover:bg-[#2A3F5F]/80 transition-all nebula-edge font-ui uppercase tracking-wider"
           >
-            ← Back to Menu
+            ← Back
           </motion.button>
 
-          <div className="px-4 py-2 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-full shadow-lg">
-            <div className="flex items-center gap-2 text-white font-bold">
-              <span>💰</span>
+          <div className="px-6 py-3 bg-gradient-to-r from-[#FFD700] to-[#FFA500] rounded-full shadow-lg glow-medium">
+            <div className="flex items-center gap-3 text-[#0A0E1A] font-data font-bold text-lg">
+              <span className="text-2xl">💰</span>
               <span>{cosmicCoins.toLocaleString()}</span>
             </div>
           </div>
         </div>
 
         <div className="text-center space-y-2">
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
-            Cosmic Sudoku
+          <h1 className="font-title text-6xl md:text-7xl font-black bg-gradient-to-r from-[#8B5CF6] via-[#00F5FF] to-[#FFD700] bg-clip-text text-transparent tracking-wide">
+            COSMIC SUDOKU
           </h1>
-          <p className="text-gray-300 text-lg">Journey Through the Stars</p>
+          <p className="font-ui text-lg text-[#8A9BB8] tracking-widest uppercase">Stellar Calculus</p>
         </div>
 
         <GameTimer />
@@ -54,8 +54,8 @@ export default function GamePage() {
 
         <GameControls />
 
-        <div className="text-center text-sm text-gray-400 mt-8">
-          <p>🚀 Progress through cosmic levels • 🤖 AI-powered hints • ⚡ Real-time duels</p>
+        <div className="text-center text-sm text-[#8A9BB8] mt-[1.618rem] font-ui tracking-wider">
+          <p>Each cell is a celestial coordinate in the infinite system</p>
         </div>
       </main>
     </div>

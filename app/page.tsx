@@ -78,9 +78,9 @@ export default function MainMenu() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-purple-900 to-slate-900">
-        <div className="absolute inset-0 opacity-30">
-          {[...Array(50)].map((_, i) => (
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E1A] via-[#1A2744] to-[#0A0E1A]">
+        <div className="absolute inset-0 opacity-40">
+          {[...Array(100)].map((_, i) => (
             <motion.div
               key={i}
               className="absolute w-1 h-1 bg-white rounded-full"
@@ -89,13 +89,13 @@ export default function MainMenu() {
                 top: `${Math.random() * 100}%`,
               }}
               animate={{
-                opacity: [0.2, 1, 0.2],
+                opacity: [0.3, 1, 0.3],
                 scale: [1, 1.5, 1],
               }}
               transition={{
-                duration: 2 + Math.random() * 3,
+                duration: 3 + Math.random() * 4,
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: Math.random() * 3,
               }}
             />
           ))}
@@ -107,14 +107,14 @@ export default function MainMenu() {
         {/* Auth Buttons */}
         <div className="absolute top-8 right-8">
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <div className="text-white">
-                <p className="text-sm text-gray-400">Welcome back,</p>
-                <p className="font-bold">{username || user.email}</p>
+                <p className="text-xs font-ui text-[#8A9BB8] uppercase tracking-widest">Operator</p>
+                <p className="font-data font-bold text-lg">{username || user.email}</p>
               </div>
               <button
                 onClick={handleLogout}
-                className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+                className="px-6 py-3 bg-gradient-to-r from-[#DC2626] to-[#991B1B] hover:from-[#EF4444] hover:to-[#DC2626] text-white font-ui uppercase tracking-wider rounded-lg transition-all nebula-edge glow-soft"
               >
                 Logout
               </button>
@@ -123,13 +123,13 @@ export default function MainMenu() {
             <div className="flex gap-4">
               <button
                 onClick={() => router.push('/login')}
-                className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition"
+                className="px-6 py-3 bg-[#1A2744] hover:bg-[#2A3F5F] text-white font-ui uppercase tracking-wider rounded-lg transition-all nebula-edge"
               >
                 Login
               </button>
               <button
                 onClick={() => router.push('/signup')}
-                className="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg transition"
+                className="px-6 py-3 bg-gradient-to-r from-[#8B5CF6] to-[#00F5FF] hover:from-[#9333EA] hover:to-[#06B6D4] text-white font-ui uppercase tracking-wider rounded-lg transition-all glow-medium"
               >
                 Sign Up
               </button>
@@ -142,13 +142,13 @@ export default function MainMenu() {
           initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-[4.236rem]"
         >
-          <h1 className="text-7xl md:text-9xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
-            Cosmic Sudoku
+          <h1 className="font-title text-8xl md:text-9xl font-black bg-gradient-to-r from-[#8B5CF6] via-[#00F5FF] to-[#FFD700] bg-clip-text text-transparent mb-6 tracking-wide">
+            COSMIC SUDOKU
           </h1>
-          <p className="text-xl md:text-2xl text-gray-300">
-            Journey Through the Stars
+          <p className="font-ui text-xl md:text-2xl text-[#8A9BB8] tracking-wider uppercase">
+            Stellar Calculus
           </p>
         </motion.div>
 
@@ -157,16 +157,17 @@ export default function MainMenu() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 }}
-          className="mb-8 px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 rounded-full shadow-lg"
+          className="mb-[2.618rem] px-8 py-4 bg-gradient-to-r from-[#FFD700] to-[#FFA500] rounded-full shadow-lg glow-medium"
         >
-          <div className="flex items-center gap-2 text-white font-bold text-xl">
-            <span className="text-2xl">💰</span>
-            <span>{cosmicCoins.toLocaleString()} Cosmic Coins</span>
+          <div className="flex items-center gap-3 text-[#0A0E1A] font-data font-bold text-xl">
+            <span className="text-3xl">💰</span>
+            <span>{cosmicCoins.toLocaleString()}</span>
+            <span className="font-ui text-sm uppercase tracking-wider opacity-80">Cosmic Coins</span>
           </div>
         </motion.div>
 
         {/* Menu Items */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.618rem] w-full max-w-6xl px-4">
           {menuItems.map((item, index) => (
             <motion.button
               key={item.id}
@@ -177,33 +178,40 @@ export default function MainMenu() {
               whileTap={{ scale: 0.95 }}
               onClick={() => !item.comingSoon && router.push(item.route)}
               disabled={item.comingSoon}
-              className={`relative p-8 rounded-2xl bg-gradient-to-br ${item.gradient} shadow-2xl overflow-hidden group ${
-                item.comingSoon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+              className={`relative p-[2.618rem] rounded-2xl bg-gradient-to-br ${item.gradient} overflow-hidden group nebula-edge ${
+                item.comingSoon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer gravitational-pull'
               }`}
             >
-              {/* Glow Effect */}
-              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+              {/* Orbital Glow */}
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
 
               {/* Content */}
               <div className="relative z-10 text-white">
-                <div className="text-6xl mb-4">{item.icon}</div>
-                <h2 className="text-3xl font-bold mb-2">{item.title}</h2>
-                <p className="text-lg opacity-90">{item.description}</p>
+                <div className="text-7xl mb-6 animate-orbital">{item.icon}</div>
+                <h2 className="font-title text-4xl font-bold mb-3 tracking-wide">{item.title}</h2>
+                <p className="font-ui text-lg opacity-90 tracking-wide">{item.description}</p>
 
                 {item.comingSoon && (
-                  <div className="mt-4 inline-block px-4 py-1 bg-black/30 rounded-full text-sm">
+                  <div className="mt-6 inline-block px-6 py-2 bg-black/40 rounded-full text-sm font-ui uppercase tracking-widest nebula-edge">
                     Coming Soon
                   </div>
                 )}
               </div>
 
-              {/* Animated Border */}
+              {/* Stellar Pulse Border */}
               <motion.div
-                className="absolute inset-0 border-2 border-white/20 rounded-2xl"
-                animate={{
-                  borderColor: ['rgba(255,255,255,0.2)', 'rgba(255,255,255,0.5)', 'rgba(255,255,255,0.2)'],
+                className="absolute inset-0 rounded-2xl"
+                style={{
+                  border: '2px solid rgba(139, 92, 246, 0.3)',
                 }}
-                transition={{ duration: 2, repeat: Infinity }}
+                animate={{
+                  boxShadow: [
+                    '0 0 20px rgba(139, 92, 246, 0.2)',
+                    '0 0 40px rgba(139, 92, 246, 0.4)',
+                    '0 0 20px rgba(139, 92, 246, 0.2)',
+                  ],
+                }}
+                transition={{ duration: 3, repeat: Infinity }}
               />
             </motion.button>
           ))}
@@ -214,10 +222,10 @@ export default function MainMenu() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1 }}
-          className="mt-12 text-center text-gray-400"
+          className="mt-[2.618rem] text-center text-[#8A9BB8] font-ui"
         >
-          <p className="text-sm">
-            🚀 Explore • 🧠 Master • 🏆 Conquer the Cosmos
+          <p className="text-sm tracking-widest uppercase">
+            Structure and beauty are not opposites but the same truth
           </p>
         </motion.div>
       </div>

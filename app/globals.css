@@ -1,28 +1,172 @@
 @import "tailwindcss";
 
+/* Stellar Calculus Design System */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Deep Space Palette - Earth to Deep Space */
+  --space-void: #0A0E1A;
+  --space-deep: #1A2744;
+  --space-medium: #2A3F5F;
+  --moon-silver: #8A9BB8;
+  --mars-rust: #C0553A;
+  --mars-copper: #D4734F;
+
+  /* Cosmic Phenomena */
+  --neon-cyan: #00F5FF;
+  --electric-violet: #8B5CF6;
+  --gold-star: #FFD700;
+  --nebula-pink: #FF6EC7;
+  --warning-crimson: #DC2626;
+
+  /* Luminescence */
+  --glow-soft: rgba(139, 92, 246, 0.15);
+  --glow-medium: rgba(139, 92, 246, 0.3);
+  --glow-intense: rgba(139, 92, 246, 0.6);
+
+  /* Typography */
+  --font-title: var(--font-tektur);
+  --font-ui: var(--font-jura);
+  --font-data: var(--font-jetbrains-mono);
+
+  /* Golden Ratio Spacing */
+  --space-phi: 1.618;
+  --space-xs: 0.382rem;  /* 1/φ² */
+  --space-sm: 0.618rem;  /* 1/φ */
+  --space-md: 1rem;
+  --space-lg: 1.618rem;  /* φ */
+  --space-xl: 2.618rem;  /* φ² */
+  --space-2xl: 4.236rem; /* φ³ */
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--space-void);
+  --color-foreground: #FFFFFF;
+  --font-sans: var(--font-jura);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--space-void);
+  color: var(--color-foreground);
+  font-family: var(--font-ui), sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+/* Typography Classes */
+.font-title {
+  font-family: var(--font-title), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.font-ui {
+  font-family: var(--font-ui), sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+.font-data {
+  font-family: var(--font-data), monospace;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+/* Gravitational Glow Effects */
+.glow-soft {
+  box-shadow: 0 0 20px var(--glow-soft);
+}
+
+.glow-medium {
+  box-shadow: 0 0 30px var(--glow-medium);
+}
+
+.glow-intense {
+  box-shadow: 0 0 40px var(--glow-intense);
+}
+
+.glow-orbital {
+  box-shadow:
+    0 0 20px var(--glow-soft),
+    0 0 40px var(--glow-medium),
+    inset 0 0 20px var(--glow-soft);
+}
+
+/* Nebula Edge Luminescence */
+.nebula-edge {
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow:
+    0 0 10px rgba(139, 92, 246, 0.2),
+    inset 0 0 10px rgba(139, 92, 246, 0.1);
+}
+
+/* Chromatic Tension Shift */
+@keyframes chromatic-tension {
+  0% {
+    filter: hue-rotate(0deg) brightness(1);
+    border-color: var(--electric-violet);
+  }
+  50% {
+    filter: hue-rotate(-30deg) brightness(1.2);
+    border-color: var(--warning-crimson);
+  }
+  100% {
+    filter: hue-rotate(0deg) brightness(1);
+    border-color: var(--electric-violet);
+  }
+}
+
+.tension-chromatic {
+  animation: chromatic-tension 2s ease-in-out infinite;
+}
+
+/* Orbital Mechanics */
+@keyframes orbital-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  25% {
+    transform: translateY(-8px) translateX(4px);
+  }
+  50% {
+    transform: translateY(0) translateX(8px);
+  }
+  75% {
+    transform: translateY(8px) translateX(4px);
+  }
+}
+
+.animate-orbital {
+  animation: orbital-float 8s ease-in-out infinite;
+}
+
+/* Stellar Pulse */
+@keyframes stellar-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+    box-shadow: 0 0 20px var(--glow-soft);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+    box-shadow: 0 0 40px var(--glow-medium);
+  }
+}
+
+.animate-stellar-pulse {
+  animation: stellar-pulse 4s ease-in-out infinite;
+}
+
+/* Gravitational Pull (hover state) */
+.gravitational-pull {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gravitational-pull:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 30px var(--glow-medium),
+    0 0 60px var(--glow-soft);
 }
 
 @keyframes screenShake {
