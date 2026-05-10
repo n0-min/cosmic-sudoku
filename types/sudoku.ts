@@ -1,0 +1,65 @@
+export type Cell = number | null;
+export type Grid = Cell[][];
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
+
+export interface SudokuPuzzle {
+  puzzle: Grid;
+  solution: Grid;
+  difficulty: Difficulty;
+  level: number;
+}
+
+export interface GameState {
+  puzzle: Grid;
+  solution: Grid;
+  currentGrid: Grid;
+  startTime: number;
+  elapsedTime: number;
+  difficulty: Difficulty;
+  level: number;
+  mistakes: number;
+  hintsUsed: number;
+  isComplete: boolean;
+  isPaused: boolean;
+}
+
+export interface ValidationResult {
+  isValid: boolean;
+  isComplete: boolean;
+  errors: { row: number; col: number }[];
+}
+
+export type SkinRarity = 'common' | 'rare' | 'epic' | 'legendary';
+
+export interface Skin {
+  id: string;
+  skin_id: string;
+  name: string;
+  description: string;
+  price: number;
+  rarity: SkinRarity;
+  preview_image?: string;
+  theme_colors: {
+    primary: string;
+    secondary: string;
+  };
+}
+
+export interface UserProfile {
+  id: string;
+  username: string;
+  city?: string;
+  level: number;
+  total_score: number;
+  games_played: number;
+  games_won: number;
+  cosmic_coins: number;
+  current_skin: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CurrencyReward {
+  coins_earned: number;
+  new_total: number;
+}

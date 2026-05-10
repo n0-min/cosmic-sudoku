@@ -24,3 +24,85 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-2px, 1px); }
+  20% { transform: translate(2px, -1px); }
+  30% { transform: translate(-1px, 2px); }
+  40% { transform: translate(1px, -2px); }
+  50% { transform: translate(-2px, -1px); }
+  60% { transform: translate(2px, 1px); }
+  70% { transform: translate(-1px, -2px); }
+  80% { transform: translate(1px, 2px); }
+  90% { transform: translate(-2px, -1px); }
+}
+
+@keyframes glitchLight {
+  0%, 100% { opacity: 1; transform: translate(0); }
+  33% { opacity: 0.8; transform: translate(-1px, 1px); }
+  66% { opacity: 0.9; transform: translate(1px, -1px); }
+}
+
+@keyframes glitchMedium {
+  0%, 100% { opacity: 1; transform: translate(0); }
+  25% { opacity: 0.7; transform: translate(-2px, 2px); }
+  50% { opacity: 0.8; transform: translate(2px, -2px); }
+  75% { opacity: 0.9; transform: translate(-1px, 1px); }
+}
+
+@keyframes glitchIntense {
+  0%, 100% { opacity: 1; transform: translate(0) skew(0deg); }
+  20% { opacity: 0.6; transform: translate(-3px, 3px) skew(2deg); }
+  40% { opacity: 0.7; transform: translate(3px, -3px) skew(-2deg); }
+  60% { opacity: 0.8; transform: translate(-2px, -2px) skew(1deg); }
+  80% { opacity: 0.9; transform: translate(2px, 2px) skew(-1deg); }
+}
+
+.animate-glitch-light {
+  animation: glitchLight 0.3s infinite;
+}
+
+.animate-glitch-medium {
+  animation: glitchMedium 0.2s infinite;
+}
+
+.animate-glitch-intense {
+  animation: glitchIntense 0.15s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
+}
