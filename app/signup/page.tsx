@@ -67,13 +67,16 @@ export default function SignupPage() {
       if (authData.user) {
         console.log('User created, creating profile...');
 
-        // Create profile - ignore error if profile already exists
+        // Create profile with initial values
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
             id: authData.user.id,
             username,
             city: city || null,
+            cosmic_coins: 0,
+            current_skin: 'default',
+            owned_skins: ['default'],
           });
 
         if (profileError) {
