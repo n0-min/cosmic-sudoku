@@ -43,13 +43,33 @@ export default function MainMenu() {
 
         if (profile) {
           setUsername(profile.username);
-          // Load user data into store
-          const ownedSkins = profile.owned_skins || ['default'];
+          // Load user data into store with fallback values
+          const cosmicCoins = profile.cosmic_coins ?? 0;
+          const currentSkin = profile.current_skin || 'default';
+          const ownedSkins = (profile.owned_skins && profile.owned_skins.length > 0)
+            ? profile.owned_skins
+            : ['default'];
+
+          console.log('Loading profile data:', { cosmicCoins, currentSkin, ownedSkins });
+
           useUserStore.getState().loadUserData(
-            profile.cosmic_coins || 0,
-            profile.current_skin || 'default',
+            cosmicCoins,
+            currentSkin,
             ownedSkins
           );
+
+          // If profile has null values, update them in database
+          if (profile.cosmic_coins === null || profile.current_skin === null || !profile.owned_skins) {
+            console.log('Updating profile with default values...');
+            await supabase
+              .from('profiles')
+              .update({
+                cosmic_coins: cosmicCoins,
+                current_skin: currentSkin,
+                owned_skins: ownedSkins,
+              })
+              .eq('id', user.id);
+          }
         }
       } else {
         // Reset user data when logged out
@@ -80,12 +100,33 @@ export default function MainMenu() {
 
         if (profile) {
           setUsername(profile.username);
-          const ownedSkins = profile.owned_skins || ['default'];
+          // Load user data with fallback values
+          const cosmicCoins = profile.cosmic_coins ?? 0;
+          const currentSkin = profile.current_skin || 'default';
+          const ownedSkins = (profile.owned_skins && profile.owned_skins.length > 0)
+            ? profile.owned_skins
+            : ['default'];
+
+          console.log('Loading profile data (auth change):', { cosmicCoins, currentSkin, ownedSkins });
+
           useUserStore.getState().loadUserData(
-            profile.cosmic_coins || 0,
-            profile.current_skin || 'default',
+            cosmicCoins,
+            currentSkin,
             ownedSkins
           );
+
+          // If profile has null values, update them in database
+          if (profile.cosmic_coins === null || profile.current_skin === null || !profile.owned_skins) {
+            console.log('Updating profile with default values...');
+            await supabase
+              .from('profiles')
+              .update({
+                cosmic_coins: cosmicCoins,
+                current_skin: currentSkin,
+                owned_skins: ownedSkins,
+              })
+              .eq('id', session.user.id);
+          }
         }
       } else {
         // Reset user data when logged out
