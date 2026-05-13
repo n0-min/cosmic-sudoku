@@ -24,24 +24,30 @@ export default function MainMenu() {
 
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log('Main page: Got user:', user);
       setUser(user);
 
       if (user) {
         // Set userId in store
         useUserStore.getState().setUserId(user.id);
+        console.log('Main page: Set userId in store:', user.id);
 
         // Load user data from database
+        console.log('Main page: Fetching profile for user:', user.id);
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('username, cosmic_coins, current_skin, owned_skins')
           .eq('id', user.id)
           .maybeSingle();
 
+        console.log('Main page: Profile query result:', { profile, error });
+
         if (error) {
           console.error('Error loading profile:', error);
         }
 
         if (profile) {
+          console.log('Main page: Profile found:', profile);
           setUsername(profile.username);
           // Load user data into store with fallback values
           const cosmicCoins = profile.cosmic_coins ?? 0;
@@ -61,7 +67,7 @@ export default function MainMenu() {
           // If profile has null values, update them in database
           if (profile.cosmic_coins === null || profile.current_skin === null || !profile.owned_skins) {
             console.log('Updating profile with default values...');
-            await supabase
+            const { error: updateError } = await supabase
               .from('profiles')
               .update({
                 cosmic_coins: cosmicCoins,
@@ -69,9 +75,18 @@ export default function MainMenu() {
                 owned_skins: ownedSkins,
               })
               .eq('id', user.id);
+
+            if (updateError) {
+              console.error('Error updating profile:', updateError);
+            } else {
+              console.log('Profile updated successfully');
+            }
           }
+        } else {
+          console.warn('Main page: No profile found for user:', user.id);
         }
       } else {
+        console.log('Main page: No user logged in');
         // Reset user data when logged out
         useUserStore.getState().resetUserData();
         setUsername('');
