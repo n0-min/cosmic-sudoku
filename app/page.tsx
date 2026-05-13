@@ -3,40 +3,95 @@
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/store/user-store';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { useEffect, useState } from 'react';
+import { SkinEffects } from '@/components/game/skin-effects';
+import { createBrowserClient } from '@supabase/ssr';
+import { useEffect, useState, useMemo } from 'react';
 import type { User } from '@supabase/supabase-js';
 
 export default function MainMenu() {
   const router = useRouter();
-  const { cosmicCoins } = useUserStore();
+  const { cosmicCoins, currentSkin } = useUserStore();
   const [user, setUser] = useState<User | null>(null);
   const [username, setUsername] = useState<string>('');
-  const supabase = createClientComponentClient();
+  const [mounted, setMounted] = useState(false);
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
+    setMounted(true);
+
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
 
       if (user) {
-        const { data: profile } = await supabase
+        // Set userId in store
+        useUserStore.getState().setUserId(user.id);
+
+        // Load user data from database
+        const { data: profile, error } = await supabase
           .from('profiles')
-          .select('username, cosmic_coins')
+          .select('username, cosmic_coins, current_skin, owned_skins')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error loading profile:', error);
+        }
 
         if (profile) {
           setUsername(profile.username);
-          useUserStore.setState({ cosmicCoins: profile.cosmic_coins });
+          // Load user data into store
+          const ownedSkins = profile.owned_skins || ['default'];
+          useUserStore.getState().loadUserData(
+            profile.cosmic_coins || 0,
+            profile.current_skin || 'default',
+            ownedSkins
+          );
         }
+      } else {
+        // Reset user data when logged out
+        useUserStore.getState().resetUserData();
+        setUsername('');
       }
     };
 
     getUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+
+      if (session?.user) {
+        // Set userId in store
+        useUserStore.getState().setUserId(session.user.id);
+
+        // Load user data when logged in
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('username, cosmic_coins, current_skin, owned_skins')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error loading profile:', error);
+        }
+
+        if (profile) {
+          setUsername(profile.username);
+          const ownedSkins = profile.owned_skins || ['default'];
+          useUserStore.getState().loadUserData(
+            profile.cosmic_coins || 0,
+            profile.current_skin || 'default',
+            ownedSkins
+          );
+        }
+      } else {
+        // Reset user data when logged out
+        useUserStore.getState().resetUserData();
+        setUsername('');
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -55,15 +110,24 @@ export default function MainMenu() {
       icon: '🎮',
       gradient: 'from-blue-600 to-purple-600',
       route: '/game',
+      requiresDifficulty: true,
     },
     {
       id: 'duel',
       title: 'Duel Mode',
       description: 'Challenge players in real-time',
       icon: '⚔️',
-      gradient: 'from-red-600 to-orange-600',
+      gradient: 'from-red-400 to-orange-400',
       route: '/duel',
       comingSoon: true,
+    },
+    {
+      id: 'stats',
+      title: 'Statistics',
+      description: 'View global leaderboards',
+      icon: '📊',
+      gradient: 'from-cyan-600 to-blue-600',
+      route: '/stats',
     },
     {
       id: 'shop',
@@ -73,33 +137,56 @@ export default function MainMenu() {
       gradient: 'from-purple-600 to-pink-600',
       route: '/shop',
     },
+    {
+      id: 'donate',
+      title: 'Get Coins',
+      description: 'Support development & get rewards',
+      icon: '💰',
+      gradient: 'from-yellow-500 to-orange-500',
+      route: '/donate',
+    },
   ];
+
+  const stars = useMemo(() => {
+    return [...Array(100)].map((_, i) => ({
+      key: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: 3 + Math.random() * 4,
+      delay: Math.random() * 3,
+    }));
+  }, []);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E1A] via-[#1A2744] to-[#0A0E1A]">
-        <div className="absolute inset-0 opacity-40">
-          {[...Array(100)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-white rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                opacity: [0.3, 1, 0.3],
-                scale: [1, 1.5, 1],
-              }}
-              transition={{
-                duration: 3 + Math.random() * 4,
-                repeat: Infinity,
-                delay: Math.random() * 3,
-              }}
-            />
-          ))}
-        </div>
+        {mounted && (
+          <>
+            <SkinEffects />
+            <div className="absolute inset-0 opacity-40">
+              {stars.map((star) => (
+                <motion.div
+                  key={star.key}
+                  className="absolute w-1 h-1 bg-white rounded-full"
+                  style={{
+                    left: `${star.left}%`,
+                    top: `${star.top}%`,
+                  }}
+                  animate={{
+                    opacity: [0.3, 1, 0.3],
+                    scale: [1, 1.5, 1],
+                  }}
+                  transition={{
+                    duration: star.duration,
+                    repeat: Infinity,
+                    delay: star.delay,
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* Content */}
@@ -139,9 +226,6 @@ export default function MainMenu() {
 
         {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
           className="text-center mb-[4.236rem]"
         >
           <h1 className="font-title text-8xl md:text-9xl font-black bg-gradient-to-r from-[#8B5CF6] via-[#00F5FF] to-[#FFD700] bg-clip-text text-transparent mb-6 tracking-wide">
@@ -154,9 +238,6 @@ export default function MainMenu() {
 
         {/* Cosmic Coins Display */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
           className="mb-[2.618rem] px-8 py-4 bg-gradient-to-r from-[#FFD700] to-[#FFA500] rounded-full shadow-lg glow-medium"
         >
           <div className="flex items-center gap-3 text-[#0A0E1A] font-data font-bold text-xl">
@@ -167,19 +248,16 @@ export default function MainMenu() {
         </motion.div>
 
         {/* Menu Items */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-[1.618rem] w-full max-w-6xl px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1.618rem] w-full max-w-7xl px-4">
           {menuItems.map((item, index) => (
             <motion.button
               key={item.id}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 * (index + 1), duration: 0.5 }}
               whileHover={{ scale: 1.05, y: -10 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => !item.comingSoon && router.push(item.route)}
               disabled={item.comingSoon}
               className={`relative p-[2.618rem] rounded-2xl bg-gradient-to-br ${item.gradient} overflow-hidden group nebula-edge ${
-                item.comingSoon ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer gravitational-pull'
+                item.comingSoon ? 'cursor-not-allowed' : 'cursor-pointer gravitational-pull'
               }`}
             >
               {/* Orbital Glow */}

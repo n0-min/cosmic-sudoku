@@ -32,3 +32,31 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code
+.claude/
+
+# Test/Debug SQL files
+supabase/migrations/CHECK_*.sql
+supabase/migrations/DISABLE_*.sql
+supabase/migrations/ENABLE_*.sql
+supabase/migrations/FINAL_*.sql
+supabase/migrations/FIX_*.sql
+supabase/migrations/TEST_*.sql
+supabase/migrations/UPDATE_*.sql
+supabase/migrations/VERIFY_*.sql
+supabase/migrations/WHY_*.sql
+supabase/migrations/diagnose.sql
+supabase/migrations/quick_check.sql
+supabase/migrations/check_profiles_table.sql
+supabase/migrations/fix_profile_406.sql
+supabase/migrations/fix_rls_policies.sql
+supabase/DIAGNOSE_*.sql
+supabase/SIMPLE_*.sql
+supabase/VERIFY_*.sql

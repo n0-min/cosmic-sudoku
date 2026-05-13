@@ -77,18 +77,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error: updateError } = await supabase.rpc('increment_user_stats', {
+    const { data: rewardData, error: updateError } = await supabase.rpc('award_completion_rewards', {
       p_user_id: user.id,
       p_score: Math.max(0, score),
+      p_difficulty: validatedData.difficulty,
     });
 
     if (updateError) {
       console.error('Stats update error:', updateError);
     }
 
+    const coinsEarned = rewardData?.[0]?.coins_earned || 0;
+    const newTotal = rewardData?.[0]?.new_total || 0;
+
     return NextResponse.json({
       success: true,
       score: Math.max(0, score),
+      coinsEarned,
+      newTotal,
     });
   } catch (error) {
     console.error('Score submission error:', error);

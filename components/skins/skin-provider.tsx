@@ -35,6 +35,13 @@ export function SkinProvider({ children }: { children: React.ReactNode }) {
       document.body.classList.add(`skin-${skin.id}`);
     }
 
+    // Apply Void Ceremony global black/white theme
+    if (skin.id === 'void') {
+      document.body.classList.add('void-theme');
+    } else {
+      document.body.classList.remove('void-theme');
+    }
+
     // Apply animation class
     if (skin.effects.animation) {
       document.body.classList.add(`animate-${skin.effects.animation}`);

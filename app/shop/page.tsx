@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/lib/store/user-store';
+import { SkinEffects } from '@/components/game/skin-effects';
 import { getAllSkins, type SkinTheme } from '@/lib/skins/material-skins';
 
 const RARITY_COLORS = {
@@ -29,10 +30,19 @@ const RARITY_LABELS = {
 
 export default function ShopPage() {
   const router = useRouter();
-  const { cosmicCoins, currentSkin, setCurrentSkin } = useUserStore();
-  const [ownedSkins, setOwnedSkins] = useState<string[]>(['default']);
+  const { cosmicCoins, currentSkin, ownedSkins, setCurrentSkin, addOwnedSkin, setCosmicCoins } = useUserStore();
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const allSkins = getAllSkins();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return null;
+  }
 
   const handlePurchase = async (skin: SkinTheme) => {
     if (cosmicCoins < skin.price) {
@@ -44,8 +54,8 @@ export default function ShopPage() {
 
     // Simulate purchase
     setTimeout(() => {
-      setOwnedSkins([...ownedSkins, skin.id]);
-      useUserStore.setState({ cosmicCoins: cosmicCoins - skin.price });
+      addOwnedSkin(skin.id);
+      setCosmicCoins(cosmicCoins - skin.price);
       setPurchasingId(null);
     }, 500);
   };
@@ -56,6 +66,7 @@ export default function ShopPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0A0E1A] via-[#1A2744] to-[#0A0E1A] text-white overflow-hidden relative">
+      <SkinEffects />
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(100)].map((_, i) => (
@@ -224,6 +235,52 @@ export default function ShopPage() {
             );
           })}
         </div>
+
+        {/* Coming Soon Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="mt-[4.236rem] max-w-4xl mx-auto"
+        >
+          <div className="relative p-12 rounded-2xl bg-gradient-to-br from-[#1A2744]/60 to-[#2A3F5F]/40 overflow-hidden nebula-edge border-2 border-[#8B5CF6]/30">
+            {/* Animated glow */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-[#8B5CF6]/10 via-[#00F5FF]/10 to-[#FFD700]/10"
+              animate={{
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+              }}
+            />
+
+            <div className="relative z-10 text-center space-y-4">
+              <div className="text-6xl mb-4">🚀</div>
+              <h2 className="font-title text-5xl font-bold bg-gradient-to-r from-[#8B5CF6] via-[#00F5FF] to-[#FFD700] bg-clip-text text-transparent tracking-wide">
+                MORE REALITIES INCOMING
+              </h2>
+              <p className="font-ui text-xl text-[#8A9BB8] tracking-wider uppercase">
+                New Material Skins Coming Soon
+              </p>
+              <div className="pt-4 flex justify-center gap-8 text-[#8A9BB8] font-data text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">✨</span>
+                  <span>Plasma State</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🌊</span>
+                  <span>Liquid Crystal</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">💎</span>
+                  <span>Diamond Lattice</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
         {/* Footer */}
         <motion.div

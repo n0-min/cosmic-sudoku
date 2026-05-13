@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ValidateRequestSchema } from '@/lib/validation/schemas';
 import { SudokuGenerator } from '@/lib/sudoku/generator';
+import { z } from 'zod';
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { error: 'Invalid request data', details: error.issues },
         { status: 400 }
       );
     }

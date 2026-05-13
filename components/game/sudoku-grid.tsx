@@ -1,22 +1,47 @@
 'use client';
 
 import { useGameStore } from '@/lib/store/game-store';
+import { useUserStore } from '@/lib/store/user-store';
+import { getSkinById } from '@/lib/skins/material-skins';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
+import { SudokuCell } from './sudoku-cell';
 
 export function SudokuGrid() {
-  const { puzzle, currentGrid, setCell, isComplete, isPaused } = useGameStore();
-  const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
+  const {
+    puzzle,
+    currentGrid,
+    notes,
+    selectedCell,
+    notesMode,
+    isComplete,
+    isPaused,
+    setCell,
+    toggleNote,
+    setSelectedCell,
+    clearSelectedCell,
+    toggleNotesMode,
+    getConflicts,
+  } = useGameStore();
+
+  const { currentSkin } = useUserStore();
+  const skin = getSkinById(currentSkin);
+
+  const conflicts = useMemo(() => getConflicts(), [currentGrid]);
 
   const handleCellClick = (row: number, col: number) => {
     if (puzzle[row][col] === null && !isComplete && !isPaused) {
-      setSelectedCell({ row, col });
+      setSelectedCell(row, col);
     }
   };
 
   const handleNumberInput = (num: number) => {
     if (selectedCell && !isComplete && !isPaused) {
-      setCell(selectedCell.row, selectedCell.col, num);
+      if (notesMode) {
+        toggleNote(selectedCell.row, selectedCell.col, num);
+      } else {
+        setCell(selectedCell.row, selectedCell.col, num);
+      }
     }
   };
 
@@ -28,107 +53,155 @@ export function SudokuGrid() {
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (!selectedCell || isComplete || isPaused) return;
+      if (isComplete || isPaused) return;
+
+      if (e.key.toLowerCase() === 'n') {
+        toggleNotesMode();
+        return;
+      }
+
+      if (!selectedCell) return;
 
       if (e.key >= '1' && e.key <= '9') {
         handleNumberInput(parseInt(e.key));
       } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
         handleClear();
+      } else if (e.key === 'Escape') {
+        clearSelectedCell();
+      } else if (e.key === 'ArrowUp' && selectedCell.row > 0) {
+        setSelectedCell(selectedCell.row - 1, selectedCell.col);
+      } else if (e.key === 'ArrowDown' && selectedCell.row < 8) {
+        setSelectedCell(selectedCell.row + 1, selectedCell.col);
+      } else if (e.key === 'ArrowLeft' && selectedCell.col > 0) {
+        setSelectedCell(selectedCell.row, selectedCell.col - 1);
+      } else if (e.key === 'ArrowRight' && selectedCell.col < 8) {
+        setSelectedCell(selectedCell.row, selectedCell.col + 1);
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [selectedCell, isComplete, isPaused]);
+  }, [selectedCell, isComplete, isPaused, notesMode]);
+
+  const selectedValue = selectedCell ? currentGrid[selectedCell.row][selectedCell.col] : null;
+
+  // Count how many times each number appears in the grid
+  const getNumberCount = (num: number): number => {
+    let count = 0;
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (currentGrid[row][col] === num) {
+          count++;
+        }
+      }
+    }
+    return count;
+  };
+
+  // Check if a number is complete (appears 9 times)
+  const isNumberComplete = (num: number): boolean => {
+    return getNumberCount(num) === 9;
+  };
 
   return (
     <div className="flex flex-col items-center gap-[1.618rem]">
+      {/* Notes Mode Toggle */}
+      {!isPaused && !isComplete && (
+        <motion.button
+          onClick={toggleNotesMode}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={`px-6 py-3 rounded-lg font-ui uppercase tracking-wider transition-all ${
+            notesMode
+              ? 'bg-gradient-to-r from-[#00F5FF] to-[#06B6D4] text-[#0A0E1A] glow-medium'
+              : 'bg-[#1A2744]/80 text-white hover:bg-[#2A3F5F]/80'
+          } nebula-edge`}
+        >
+          {notesMode ? '✏️ Notes Mode (N)' : '🔢 Number Mode (N)'}
+        </motion.button>
+      )}
+
       {/* Star Map Grid */}
       <div
-        className="grid grid-cols-9 gap-0 rounded-2xl overflow-hidden bg-[#0A0E1A]/80 backdrop-blur-xl p-2"
+        className="grid grid-cols-9 gap-0 overflow-hidden p-2"
         style={{
-          boxShadow: '0 0 60px rgba(139, 92, 246, 0.3), inset 0 0 40px rgba(139, 92, 246, 0.1)',
-          border: '2px solid rgba(139, 92, 246, 0.4)',
+          background: `linear-gradient(135deg, ${skin.background.gradient.join(', ')})`,
         }}
       >
-        {currentGrid.map((row, rowIndex) =>
-          row.map((cell, colIndex) => {
-            const isGiven = puzzle[rowIndex][colIndex] !== null;
-            const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex;
-            const isInSameRow = selectedCell?.row === rowIndex;
-            const isInSameCol = selectedCell?.col === colIndex;
-            const isInSameBox =
-              selectedCell &&
-              Math.floor(selectedCell.row / 3) === Math.floor(rowIndex / 3) &&
-              Math.floor(selectedCell.col / 3) === Math.floor(colIndex / 3);
+        {/* Inner border around the grid cells */}
+        <div
+          className="col-span-9 row-span-9 grid grid-cols-9 gap-0 backdrop-blur-xl"
+          style={{
+            gridColumn: '1 / -1',
+            gridRow: '1 / -1',
+            border: `2px solid ${skin.grid.border}`,
+            boxShadow: `inset 0 0 20px ${skin.grid.borderGlow}`,
+            background: skin.grid.cellBg,
+          }}
+        >
+          {currentGrid.map((row, rowIndex) =>
+            row.map((cell, colIndex) => {
+              const isGiven = puzzle[rowIndex][colIndex] !== null;
+              const isSelected = selectedCell?.row === rowIndex && selectedCell?.col === colIndex;
+              const isInSameRow = selectedCell?.row === rowIndex;
+              const isInSameCol = selectedCell?.col === colIndex;
+              const isInSameBox =
+                selectedCell !== null &&
+                Math.floor(selectedCell.row / 3) === Math.floor(rowIndex / 3) &&
+                Math.floor(selectedCell.col / 3) === Math.floor(colIndex / 3);
+              const isSameNumber = selectedValue !== null && cell === selectedValue && cell !== null;
+              const hasConflict = conflicts.has(`${rowIndex}-${colIndex}`);
 
-            // Nebula edge luminescence for 3x3 boundaries
-            const isRightEdge = colIndex % 3 === 2 && colIndex !== 8;
-            const isBottomEdge = rowIndex % 3 === 2 && rowIndex !== 8;
-
-            return (
-              <motion.button
-                key={`${rowIndex}-${colIndex}`}
-                onClick={() => handleCellClick(rowIndex, colIndex)}
-                disabled={isGiven || isComplete || isPaused}
-                whileHover={!isGiven && !isComplete && !isPaused ? { scale: 1.08 } : {}}
-                whileTap={!isGiven && !isComplete && !isPaused ? { scale: 0.92 } : {}}
-                className={`
-                  w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center font-data text-xl sm:text-2xl font-semibold
-                  transition-all duration-300 relative
-                  ${isRightEdge ? 'border-r-2' : 'border-r'}
-                  ${isBottomEdge ? 'border-b-2' : 'border-b'}
-                  ${isRightEdge || isBottomEdge ? 'border-[#8B5CF6]' : 'border-[#1A2744]'}
-                  ${isGiven ? 'text-[#00F5FF] bg-[#1A2744]/60 cursor-not-allowed' : 'text-white bg-[#0A0E1A]/40'}
-                  ${isSelected ? 'bg-[#8B5CF6]/40 ring-2 ring-[#00F5FF] glow-orbital' : ''}
-                  ${!isSelected && (isInSameRow || isInSameCol || isInSameBox) ? 'bg-[#8B5CF6]/10' : ''}
-                  ${!isGiven && !isComplete && !isPaused ? 'hover:bg-[#8B5CF6]/30 cursor-pointer gravitational-pull' : ''}
-                  ${isPaused ? 'blur-sm' : ''}
-                `}
-                style={
-                  isSelected
-                    ? {
-                        boxShadow: '0 0 30px rgba(0, 245, 255, 0.5), inset 0 0 20px rgba(139, 92, 246, 0.3)',
-                      }
-                    : isRightEdge || isBottomEdge
-                    ? {
-                        boxShadow: '0 0 10px rgba(139, 92, 246, 0.2)',
-                      }
-                    : {}
-                }
-              >
-                {!isPaused && cell !== null && (
-                  <motion.span
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  >
-                    {cell}
-                  </motion.span>
-                )}
-              </motion.button>
-            );
-          })
-        )}
+              return (
+                <SudokuCell
+                  key={`${rowIndex}-${colIndex}`}
+                  value={cell}
+                  notes={notes[rowIndex][colIndex]}
+                  row={rowIndex}
+                  col={colIndex}
+                  isGiven={isGiven}
+                  isSelected={isSelected}
+                  isInSameRow={isInSameRow}
+                  isInSameCol={isInSameCol}
+                  isInSameBox={isInSameBox}
+                  isSameNumber={isSameNumber}
+                  hasConflict={hasConflict}
+                  isPaused={isPaused}
+                  isComplete={isComplete}
+                  notesMode={notesMode}
+                  onClick={() => handleCellClick(rowIndex, colIndex)}
+                />
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Number Input Pad */}
       {!isPaused && !isComplete && (
-        <div className="grid grid-cols-9 gap-[0.618rem]">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-            <motion.button
-              key={num}
-              onClick={() => handleNumberInput(num)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#8B5CF6] to-[#6D28D9] hover:from-[#9333EA] hover:to-[#7C3AED] text-white font-data font-bold text-lg rounded-lg transition-all nebula-edge"
-              style={{
-                boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)',
-              }}
-            >
-              {num}
-            </motion.button>
-          ))}
+        <div className="grid grid-cols-9 gap-2 sm:gap-[0.618rem] w-full max-w-md">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+            const isComplete = isNumberComplete(num);
+
+            if (isComplete) {
+              return null; // Hide button if number is complete
+            }
+
+            return (
+              <motion.button
+                key={num}
+                onClick={() => handleNumberInput(num)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="w-full aspect-square min-h-[44px] bg-gradient-to-br from-[#8B5CF6] to-[#6D28D9] hover:from-[#9333EA] hover:to-[#7C3AED] active:from-[#7C3AED] active:to-[#6D28D9] text-white font-data font-bold text-base sm:text-lg rounded-lg transition-all nebula-edge touch-manipulation"
+                style={{
+                  boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)',
+                }}
+              >
+                {num}
+              </motion.button>
+            );
+          })}
         </div>
       )}
 

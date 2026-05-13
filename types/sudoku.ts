@@ -1,6 +1,8 @@
 export type Cell = number | null;
 export type Grid = Cell[][];
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
+export type Notes = Set<number>;
+export type NotesGrid = Notes[][];
 
 export interface SudokuPuzzle {
   puzzle: Grid;
@@ -13,6 +15,7 @@ export interface GameState {
   puzzle: Grid;
   solution: Grid;
   currentGrid: Grid;
+  notes: NotesGrid;
   startTime: number;
   elapsedTime: number;
   difficulty: Difficulty;
@@ -21,6 +24,12 @@ export interface GameState {
   hintsUsed: number;
   isComplete: boolean;
   isPaused: boolean;
+  notesMode: boolean;
+  selectedCell: { row: number; col: number } | null;
+  isFailed: boolean;
+  maxMistakes: number;
+  lastMistakeCell: { row: number; col: number } | null;
+  actualSolveTime: number;
 }
 
 export interface ValidationResult {

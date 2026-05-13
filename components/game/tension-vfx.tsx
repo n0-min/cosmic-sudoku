@@ -5,17 +5,19 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 export function TensionVFX() {
-  const { elapsedTime, isPaused, isComplete } = useGameStore();
+  const { elapsedTime, isPaused, isComplete, isFailed } = useGameStore();
 
-  const timeLimit = 20 * 60 * 1000;
+  const timeLimit = 30 * 60 * 1000; // 30 minutes
   const timeRemaining = timeLimit - elapsedTime;
-  const percentageRemaining = (timeRemaining / timeLimit) * 100;
+  const minutesRemaining = Math.floor(timeRemaining / 60000);
 
-  const tensionLevel = percentageRemaining < 20 ? 3 : percentageRemaining < 40 ? 2 : percentageRemaining < 60 ? 1 : 0;
+  // Tension levels based on minutes remaining
+  const tensionLevel = minutesRemaining < 5 ? 3 : minutesRemaining < 10 ? 2 : minutesRemaining < 15 ? 1 : 0;
 
   useEffect(() => {
-    if (tensionLevel >= 2 && !isPaused && !isComplete) {
-      document.body.style.animation = 'screenShake 0.5s infinite';
+    // Only shake in last 5 minutes (tensionLevel 3)
+    if (tensionLevel >= 3 && !isPaused && !isComplete && !isFailed) {
+      document.body.style.animation = 'screenShake 0.8s infinite';
     } else {
       document.body.style.animation = '';
     }
@@ -23,9 +25,9 @@ export function TensionVFX() {
     return () => {
       document.body.style.animation = '';
     };
-  }, [tensionLevel, isPaused, isComplete]);
+  }, [tensionLevel, isPaused, isComplete, isFailed]);
 
-  if (isPaused || isComplete || tensionLevel === 0) return null;
+  if (isPaused || isComplete || isFailed || tensionLevel === 0) return null;
 
   const getVignetteOpacity = () => {
     if (tensionLevel === 3) return 0.6;
@@ -34,9 +36,9 @@ export function TensionVFX() {
   };
 
   const getGlitchIntensity = () => {
-    if (tensionLevel === 3) return 'animate-glitch-intense';
-    if (tensionLevel === 2) return 'animate-glitch-medium';
-    return 'animate-glitch-light';
+    if (tensionLevel === 3) return 'animate-glitch-medium';
+    if (tensionLevel === 2) return 'animate-glitch-light';
+    return '';
   };
 
   return (
@@ -53,7 +55,7 @@ export function TensionVFX() {
         transition={{ duration: 1, repeat: Infinity }}
       />
 
-      {tensionLevel === 3 && (
+      {tensionLevel >= 2 && (
         <div className={`fixed inset-0 pointer-events-none z-40 ${getGlitchIntensity()}`}>
           <div className="absolute inset-0 bg-red-500/5" />
         </div>
