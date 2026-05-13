@@ -58,12 +58,30 @@ export default function GamePage() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+
+      // Set userId in store
+      if (user) {
+        useUserStore.getState().setUserId(user.id);
+        console.log('Game page: userId set to', user.id);
+      } else {
+        useUserStore.getState().setUserId(null);
+        console.log('Game page: userId set to null (guest mode)');
+      }
     };
 
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+
+      // Update userId in store on auth change
+      if (session?.user) {
+        useUserStore.getState().setUserId(session.user.id);
+        console.log('Game page: userId updated to', session.user.id);
+      } else {
+        useUserStore.getState().setUserId(null);
+        console.log('Game page: userId cleared (logged out)');
+      }
     });
 
     return () => subscription.unsubscribe();

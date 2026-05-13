@@ -38,15 +38,16 @@ const updateDatabase = async (userId: string | null, data: any) => {
 
   try {
     console.log('Updating database:', { userId, data });
-    const { error } = await supabase
+    const { data: result, error } = await supabase
       .from('profiles')
       .update(data)
-      .eq('id', userId);
+      .eq('id', userId)
+      .select();
 
     if (error) {
       console.error('Database update error:', error);
     } else {
-      console.log('Database updated successfully');
+      console.log('Database updated successfully:', result);
     }
   } catch (error) {
     console.error('Failed to update database:', error);
